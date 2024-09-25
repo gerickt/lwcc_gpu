@@ -13,7 +13,11 @@ def make_model(model_weights):
     weights_path = weights_check("DM-Count", model_weights)
 
     model = VGG(make_layers(cfg['E']))
-    model.load_state_dict(torch.load(weights_path, map_location ='cpu')["model"])
+    # Cargar los pesos del modelo y mover el modelo a la GPU
+    model.load_state_dict(torch.load(
+        weights_path, map_location=torch.device('cuda'))["model"])
+    # Asegúrate de que el modelo está en la GPU
+    model = model.to(torch.device('cuda'))
 
     return model
 
@@ -32,11 +36,12 @@ class VGG(nn.Module):
             nn.Conv2d(256, 128, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
         )
-        self.density_layer = nn.Sequential(nn.Conv2d(128, 1, 1) , nn.ReLU())
+        self.density_layer = nn.Sequential(nn.Conv2d(128, 1, 1), nn.ReLU())
 
     def forward(self, x):
         x = self.features(x)
-        x = nn.functional.interpolate(x, scale_factor = 2, mode='bilinear', align_corners=True)
+        x = nn.functional.interpolate(
+            x, scale_factor=2, mode='bilinear', align_corners=True)
         x = self.reg_layer(x)
         mu = self.density_layer(x)
         # B, C, H, W = mu.size()

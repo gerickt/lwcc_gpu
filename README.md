@@ -1,60 +1,70 @@
-# LWCC: A LightWeight Crowd Counting library for Python
+Aquí tienes la traducción del README con los créditos correspondientes:
 
-![](https://img.shields.io/badge/state-of%20the%20art-orange) ![](https://img.shields.io/github/license/tersekmatija/lwcc?label=license)  [![](https://pepy.tech/badge/lwcc)](https://pepy.tech/project/lwcc) ![](https://img.shields.io/github/stars/tersekmatija/lwcc) ![](https://img.shields.io/pypi/v/lwcc?color=pink)
+---
+
+# LWCC: Una librería ligera para el conteo de multitudes en Python
+
+![](https://img.shields.io/badge/state-of%20the%20art-orange) ![](https://img.shields.io/github/license/tersekmatija/lwcc?label=license) [![](https://pepy.tech/badge/lwcc)](https://pepy.tech/project/lwcc) ![](https://img.shields.io/github/stars/tersekmatija/lwcc) ![](https://img.shields.io/pypi/v/lwcc?color=pink)
 
 ![](https://raw.githubusercontent.com/tersekmatija/lwcc/master/imgs/lwcc_header_gif.gif)
 
+LWCC es un framework ligero para el conteo de multitudes en Python. Envuelve cuatro modelos de vanguardia, todos basados en redes neuronales convolucionales: [`CSRNet`](https://github.com/leeyeehoo/CSRNet-pytorch), [`Conteo de multitudes Bayesiano`](https://github.com/ZhihengCV/Bayesian-Crowd-Counting), [`DM-Count`](https://github.com/cvlab-stonybrook/DM-Count), y [`SFANet`](https://github.com/pxq0312/SFANet-crowd-counting). La librería está basada en PyTorch.
 
-LWCC is a lightweight crowd counting framework for Python. It wraps four state-of-the-art models all based on convolutional neural networks: [`CSRNet`](https://github.com/leeyeehoo/CSRNet-pytorch), [`Bayesian crowd counting`](https://github.com/ZhihengCV/Bayesian-Crowd-Counting), [`DM-Count`](https://github.com/cvlab-stonybrook/DM-Count), and [`SFANet`](https://github.com/pxq0312/SFANet-crowd-counting). The library is based on PyTorch.
+## Instalación
 
-## Installation
-
-The easiest way to install library LWCC and its prerequisites is to use the package manager [pip](https://pip.pypa.io/en/stable/). 
+La forma más sencilla de instalar la librería LWCC y sus requisitos es utilizando el gestor de paquetes [pip](https://pip.pypa.io/en/stable/).
 
 ```python
-pip install lwcc
+pip install git+https://github.com/gerickt/lwcc_gpu.git
 ```
 
-## Usage
-You can import the library and use its functionalities by:
+## Uso
+Puedes importar la librería y utilizar sus funcionalidades de la siguiente manera:
 
 ```python
 from lwcc import LWCC
 ```
-#### Count estimation
-Most straightforward way to use the library:
+
+### Estimación de conteo
+La forma más directa de usar la librería:
+
 ```python
-img = "path/to/image"
+img = "ruta/a/la/imagen"
 count = LWCC.get_count(img)
 ```
-This uses CSRNet pretrained on SHA (default). You can choose a different model pretrained on different data set using:
+
+Esto utiliza CSRNet preentrenado en SHA (por defecto). Puedes elegir un modelo diferente preentrenado en otro conjunto de datos usando:
+
 ```python
 count = LWCC.get_count(img, model_name = "DM-Count", model_weights = "SHB")
 ```
-The result is a float with predicted count.
 
-##### Large images
+El resultado es un valor flotante con el conteo predicho.
 
-**Note**: By default all images are resized such that the longest side is less than 1000px, preserving the aspect ratio. Otherwise models might perform worse for large images with sparse crowds (counting patterns on shirts, dresses). If you are estimating dense crowds, we recommend you to set the *resize_img* to *False*. The call should look like this:
+### Imágenes grandes
+
+**Nota**: Por defecto, todas las imágenes se redimensionan para que el lado más largo sea menor a 1000 px, manteniendo la proporción. De lo contrario, los modelos pueden rendir peor en imágenes grandes con multitudes dispersas (contando patrones en camisetas, vestidos). Si estás estimando multitudes densas, se recomienda que desactives el redimensionamiento estableciendo *resize_img* a *False*. La llamada se vería así:
 
 ```python
-count = LWCC.get_count(img, model_name = "DM-Count", model_weights = "SHB", resize_img = True)
+count = LWCC.get_count(img, model_name = "DM-Count", model_weights = "SHB", resize_img = False)
 ```
-#### Multiple images
-Library allows prediction of count for multiple images with a single call of *get_count*.
-You can simply pass a list of image paths:
+
+### Múltiples imágenes
+
+La librería permite la predicción de conteo para múltiples imágenes en una sola llamada a *get_count*. Simplemente puedes pasar una lista de rutas de imágenes:
 
 ```python
-img1 = "path/to/image1"
-img2 = "path/to/image2"
+img1 = "ruta/a/la/imagen1"
+img2 = "ruta/a/la/imagen2"
 count = LWCC.get_count([img1, img2])
 ```
 
-Result is then a dictionary of pairs *image_name : image_count*:
+El resultado será un diccionario con pares *nombre_de_imagen : conteo_de_imagen*:
 ![result](https://raw.githubusercontent.com/tersekmatija/lwcc/master/imgs/result.png)
 
-#### Density map
-You can also request a density map by setting flag *return_density = True*. The result is then a tuple *(count, density_map)*, where *density_map* is a 2d array with predicted densities. The array is smaller than the input image and its size depends on the model. 
+### Mapa de densidad
+
+También puedes solicitar un mapa de densidad estableciendo el parámetro *return_density = True*. El resultado será una tupla *(conteo, mapa_de_densidad)*, donde *mapa_de_densidad* es un arreglo 2D con las densidades predichas. El tamaño del arreglo es menor que el de la imagen de entrada y depende del modelo.
 
 ```python
 import matplotlib.pyplot as plt
@@ -64,76 +74,95 @@ count, density = LWCC.get_count(img, return_density = True)
 plt.imshow(density)
 plt.show()
 ```
+
 ![result_density](https://raw.githubusercontent.com/tersekmatija/lwcc/master/imgs/result_density.png)
 
-This also works for multiple images (list of image paths as input). Result is then a tuple of two dictionaries, where the first dictionary is the same as above (pairs of *image_name : image_count*) and the second dictionary contains pairs of *image_name : density_map*.
+Esto también funciona para múltiples imágenes (lista de rutas de imágenes como entrada). El resultado será una tupla de dos diccionarios, donde el primer diccionario es igual al anterior (pares de *nombre_de_imagen : conteo_de_imagen*) y el segundo diccionario contiene pares de *nombre_de_imagen : mapa_de_densidad*.
 
-#### Loading the model
-You can also directly access the PyTorch models by loading them first with the *load_model* method. 
+### Cargando el modelo
+
+También puedes acceder directamente a los modelos de PyTorch cargándolos primero con el método *load_model*.
+
 ```python
 model = LWCC.load_model(model_name = "DM-Count", model_weights = "SHA")
 ```
-The loaded *model* is a PyTorch model and you can access its weights as with any other PyTorch model.
 
-You can use it for inference as: 
+El *modelo* cargado es un modelo de PyTorch y puedes acceder a sus pesos como con cualquier otro modelo de PyTorch.
+
+Puedes usarlo para inferencia como:
+
 ```python
  count = LWCC.get_count(img, model = model)
 ```
 
-## Models
+## Modelos
 
-LWCC currently offers 4 models (CSRNet, Bayesian crowd counting, DM-Count, SFANet) pretrained on [Shanghai A](https://ieeexplore.ieee.org/document/7780439), [Shanghai B](https://ieeexplore.ieee.org/document/7780439), and [UCF-QNRF](https://www.crcv.ucf.edu/data/ucf-qnrf/) datasets. The following table shows the model name and MAE / MSE result of the available pretrained models on the test sets. 
+LWCC actualmente ofrece 4 modelos (CSRNet, Conteo de multitudes Bayesiano, DM-Count, SFANet) preentrenados en los conjuntos de datos [Shanghai A](https://ieeexplore.ieee.org/document/7780439), [Shanghai B](https://ieeexplore.ieee.org/document/7780439) y [UCF-QNRF](https://www.crcv.ucf.edu/data/ucf-qnrf/). La siguiente tabla muestra el nombre del modelo y los resultados de MAE / MSE de los modelos preentrenados en los conjuntos de prueba disponibles.
 
-|   Model name |      SHA       |      SHB      |      QNRF       |
-| -----------: | :------------: | :-----------: | :-------------: |
-|   **CSRNet** | 75.44 / 113.55 | 11.27 / 19.32 | *Not available* |
-|      **Bay** | 66.92 / 112.07 | 8.27 / 13.56  | 90.43 / 161.41  |
-| **DM-Count** | 61.39 / 98.56  | 7.68 / 12.66  | 88.97 / 154.11  |
-|   **SFANet** |*Not available* | 7.05 / 12.18  | *Not available* |
+|   Nombre del modelo |      SHA       |      SHB      |      QNRF       |
+| ------------------: | :------------: | :-----------: | :-------------: |
+|   **CSRNet**        | 75.44 / 113.55 | 11.27 / 19.32 | *No disponible* |
+|      **Bay**        | 66.92 / 112.07 | 8.27 / 13.56  | 90.43 / 161.41  |
+| **DM-Count**        | 61.39 / 98.56  | 7.68 / 12.66  | 88.97 / 154.11  |
+|   **SFANet**        | *No disponible* | 7.05 / 12.18  | *No disponible* |
 
-Valid options for *model_name* are written in the first column and thus include: `CSRNet`, `Bay`, `DM-Count`, and `SFANet`.
-Valid options for *model_weights* are written in the first row and thus include: `SHA`, `SHB`,  and `QNRF`.
+Opciones válidas para *model_name* están escritas en la primera columna e incluyen: `CSRNet`, `Bay`, `DM-Count`, y `SFANet`.
+Opciones válidas para *model_weights* están escritas en la primera fila e incluyen: `SHA`, `SHB` y `QNRF`.
 
-**Note**: Not all *model_weights* are supported with all *model_names*. See the above table for possible combinations.
+**Nota**: No todos los *model_weights* son compatibles con todos los *model_names*. Revisa la tabla anterior para combinaciones posibles.
 
+## ¿Cómo funciona?
 
-## How does it work?
-The goal of crowd counting methods is to determine the number of people present in a particular area. There exist many approaches (detection, regression, density-based approaches), however, since 2015 many convolutional neural network (CNN) based approaches have been proposed. The basic idea behind CNN based approaches is that they normally try to predict the density map from the input image and infer the count from it. These models differ in the use of different backbones, loss functions, additional maps, etc. If you are interested in a particular algorithm, you are welcome to read the paper belonging to the specific model.
+El objetivo de los métodos de conteo de multitudes es determinar el número de personas presentes en un área particular. Existen muchos enfoques (detección, regresión, enfoques basados en densidad), sin embargo, desde 2015 se han propuesto muchos enfoques basados en redes neuronales convolucionales (CNN). La idea básica de estos enfoques es que intentan predecir el mapa de densidad a partir de la imagen de entrada e inferir el conteo a partir de él. Estos modelos difieren en el uso de diferentes backbones, funciones de pérdida, mapas adicionales, etc. Si te interesa un algoritmo específico, te invitamos a leer el artículo relacionado con ese modelo.
 
-## FAQ - Frequently asked questions
+## FAQ - Preguntas frecuentes
 
-#### Can I see some more examples of LWCC in action?
-Yes, you can find some examples in [Examples.ipynb](https://github.com/tersekmatija/lwcc/blob/master/tests/Examples.ipynb)!
+### ¿Puedo ver más ejemplos de LWCC en acción?
 
-#### How accurate are the models?
+Sí, puedes encontrar algunos ejemplos en [Examples.ipynb](https://github.com/tersekmatija/lwcc/blob/master/tests/Examples.ipynb).
 
-You can see the mean absolute error (MAE) and mean squared error (MSE) of the pretrained models on test sets in section [models](#models). We recommend models pretrained on SHA or QNRF for dense crowds, and SHB for sparse crowds.
+### ¿Qué tan precisos son los modelos?
 
-#### Is GPU support available?
-No, GPU support is currently not supported yet, but is planned for the future version.
+Puedes ver el error absoluto medio (MAE) y el error cuadrático medio (MSE) de los modelos preentrenados en los conjuntos de prueba en la sección [modelos](#models). Recomendamos los modelos preentrenados en SHA o QNRF para multitudes densas, y SHB para multitudes dispersas.
 
-#### Can I load custom weights?
-Full support of loading custom pretrained weights is not supported, but is planned in the future version.
+### ¿Hay soporte para GPU?
 
-#### Can I train the models myself?
-The library does not support training, only inference.
+No, actualmente no se admite el soporte para GPU, pero está planificado para una futura versión.
 
-#### Why are my results bad?
-This might depend on the model you use, image size, density or type of the crowd, or the weights that you use. For example, models might often make mistakes for images with a group portrait, as they are trained on images containing crowds on streets, concerts, etc. Using `SHA`weights on relatively sparse crowds might also give very wrong results. On the other hand, `SHB` might perform better as the weights were trained on Shanghai B data set, which containts images with relatively sparse crowds. Using high quality images with sparse crowds might also yield bad results, as the algorithms might mistake some textures of clothings for a crowd.
+### ¿Puedo cargar pesos personalizados?
 
-As a rule of thumb, you should use `SHB` if you are planning on estimating the number of people in images with sparse crowds, and `SHA` or `QNRF` for images with dense crowds. Keep in mind that current algorithms predict the density, and there still might be some mistakes. You are welcome to try out different combinations of models and weights and see which one works the best for your problem.
+El soporte completo para cargar pesos personalizados no está disponible actualmente, pero está planeado para una futura versión.
 
-## Support
-If you like the library please show us your support by ⭐️ starring the project!
+### ¿Puedo entrenar los modelos yo mismo?
 
-If you wish to include your own crowd counting model, please contact us (*matijatersek@protonmail.com* or *masika.kljun@gmail.com*).
+La librería no admite entrenamiento, solo inferencia.
+
+### ¿Por qué mis resultados son malos?
+
+Esto puede depender del modelo que uses, el tamaño de la imagen, la densidad o el tipo de multitud, o los pesos que estés usando. Por ejemplo, los modelos a menudo cometen errores en imágenes de retratos grupales, ya que están entrenados en imágenes que contienen multitudes en calles, conciertos, etc. Usar los pesos de `SHA` en multitudes relativamente dispersas también podría dar resultados muy incorrectos. Por otro lado, `SHB` podría funcionar mejor, ya que los pesos fueron entrenados en el conjunto de datos de Shanghai B, que contiene imágenes con multitudes relativamente dispersas. Usar imágenes de alta calidad con multitudes dispersas también puede dar malos resultados, ya que los algoritmos podrían confundir algunas texturas de ropa con una multitud.
+
+Como regla general, deberías usar `SHB` si planeas estimar el número de personas en imágenes con multitudes dispersas, y `SHA
+
+` o `QNRF` para imágenes con multitudes densas. Ten en cuenta que los algoritmos actuales predicen la densidad, y aún podrían cometer algunos errores. Te invitamos a probar diferentes combinaciones de modelos y pesos para ver cuál funciona mejor para tu problema.
+
+## Soporte
+
+Si te gusta la librería, ¡por favor muéstranos tu apoyo con una ⭐️ al proyecto!
+
+Si deseas incluir tu propio modelo de conteo de multitudes, contáctanos a (*matijatersek@protonmail.com* o *masika.kljun@gmail.com*).
 
 ### Stargazers
+
 [![Stargazers repo roster for @tersekmatija/lwcc](https://reporoster.com/stars/tersekmatija/lwcc)](https://github.com/tersekmatija/lwcc/stargazers)
 
-## Citation
-This library is a result of a research of CNN Crowd Counting models by Matija Teršek and Maša Kljun. Although the paper has not been published yet, please provide the link to this GitHub repository if you use LWCC in your research.
+## Citación
 
-## License
-This library is licensed under MIT license (see [LICENSE](https://github.com/tersekmatija/lwcc/blob/master/LICENSE)). Licenses of the models wrapped in the library will be inherited, depending on the model you use ( [`CSRNet`](https://github.com/leeyeehoo/CSRNet-pytorch), [`Bayesian crowd counting`](https://github.com/ZhihengCV/Bayesian-Crowd-Counting), [`DM-Count`](https://github.com/cvlab-stonybrook/DM-Count), and [`SFANet`](https://github.com/pxq0312/SFANet-crowd-counting)).
+Esta librería es el resultado de una investigación de modelos de conteo de multitudes con CNN realizada por Matija Teršek y Maša Kljun. Aunque el artículo aún no ha sido publicado, por favor proporciona el enlace a este repositorio de GitHub si usas LWCC en tu investigación.
 
+## Licencia
+
+Esta librería está licenciada bajo la licencia MIT (ver [LICENSE](https://github.com/tersekmatija/lwcc/blob/master/LICENSE)). Las licencias de los modelos envueltos en la librería se heredan, dependiendo del modelo que utilices ([`CSRNet`](https://github.com/leeyeehoo/CSRNet-pytorch), [`Conteo de multitudes Bayesiano`](https://github.com/ZhihengCV/Bayesian-Crowd-Counting), [`DM-Count`](https://github.com/cvlab-stonybrook/DM-Count), y [`SFANet`](https://github.com/pxq0312/SFANet-crowd-counting)).
+
+---
+
+**Fork realizado por Gerick Toro para dar soporte a CUDA y permitir el procesamiento de imágenes con GPU.**

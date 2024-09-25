@@ -30,30 +30,19 @@ def load_model(model_name="CSRNet", model_weights="SHA"):
         if model:
             model = model.make_model(model_weights)
             loaded_models[model_full_name] = model
-            print("Built model {} with weights {}".format(model_name, model_weights))
+            print("Built model {} with weights {}".format(
+                model_name, model_weights))
         else:
-            raise ValueError("Invalid model_name. Model {} is not available.".format(model_name))
+            raise ValueError(
+                "Invalid model_name. Model {} is not available.".format(model_name))
 
     return loaded_models[model_full_name]
 
 
 def get_count(img_paths, model_name="CSRNet", model_weights="SHA", model=None, is_gray=False, return_density=False,
-              resize_img = True):
+              resize_img=True):
     """
     Return the count on image/s. You can use already loaded model or choose the name and pre-trained weights.
-    :param img_paths: Either String (path to the image) or a list of strings (paths).
-    :param model_name: If not using preloaded model, choose the model name. Default: "CSRNet".
-    :param model_weights: If not using preloaded model, choose the model weights.  Default: "SHA".
-    :param model: Possible preloaded model. Default: None.
-    :param is_gray: Are the input images grayscale? Default: False.
-    :param return_density: Return the predicted density maps for input? Default: False.
-    :param resize_img: Should images with high resolution be down-scaled? This is especially good for high resolution
-            images with relatively few people. For very dense crowds, False is recommended. Default: True
-    :return: Depends on whether the input is a String or list and on the return_density flag.
-        If input is a String, the output is a float with the predicted count.
-        If input is a list, the output is a dictionary with image names as keys, and predicted counts (float) as values.
-        If return_density is True, function returns a tuple (predicted_count, density_map).
-        If return_density is True and input is a list, function returns a tuple (count_dictionary, density_dictionary).
     """
 
     # if one path to array
@@ -72,16 +61,19 @@ def get_count(img_paths, model_name="CSRNet", model_weights="SHA", model=None, i
         imgs.append(img)
         names.append(name)
 
-    imgs = torch.cat(imgs)
+    # Concatenar las imágenes y moverlas a la GPU
+    # Mover las imágenes a la GPU
+    imgs = torch.cat(imgs).to(torch.device('cuda'))
 
     with torch.set_grad_enabled(False):
-        outputs = model(imgs)
+        outputs = model(imgs)  # Ejecutar el modelo en la GPU
 
-    counts = torch.sum(outputs, (1, 2, 3)).numpy()
+    # Mover los resultados de vuelta a la CPU para su manejo
+    counts = torch.sum(outputs, (1, 2, 3)).cpu().numpy()
     counts = dict(zip(names, counts))
 
-    densities = dict(zip(names, outputs[:, 0, :, :].numpy()))
-
+    # Mover densidades a la CPU
+    densities = dict(zip(names, outputs[:, 0, :, :].cpu().numpy()))
 
     if len(counts) == 1:
         if return_density:
