@@ -13,11 +13,12 @@ def make_model(model_weights):
     weights_path = weights_check("DM-Count", model_weights)
 
     model = VGG(make_layers(cfg['E']))
-    # Cargar los pesos del modelo y mover el modelo a la GPU
-    model.load_state_dict(torch.load(
-        weights_path, map_location=torch.device('cuda'))["model"])
-    # Asegúrate de que el modelo está en la GPU
-    model = model.to(torch.device('cuda'))
+    # Cargar los pesos directamente en el dispositivo adecuado (GPU o CPU)
+    model.load_state_dict(torch.load(weights_path, map_location=torch.device('cuda' if torch.cuda.is_available() else 'cpu')))
+    
+    # Mover el modelo al dispositivo adecuado
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
 
     return model
 

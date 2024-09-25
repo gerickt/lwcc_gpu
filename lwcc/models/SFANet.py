@@ -13,9 +13,12 @@ def make_model(model_weights):
     weights_path = weights_check("SFANet", model_weights)
 
     model = SFANet()
-    model.load_state_dict(torch.load(
-        weights_path, map_location=torch.device('cuda'))["model"])
-    model = model.to(torch.device('cuda'))
+    # Cargar los pesos directamente en el dispositivo adecuado (GPU o CPU)
+    model.load_state_dict(torch.load(weights_path, map_location=torch.device('cuda' if torch.cuda.is_available() else 'cpu')))
+    
+    # Mover el modelo al dispositivo adecuado
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
     return model
 
 

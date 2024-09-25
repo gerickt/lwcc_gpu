@@ -1,6 +1,5 @@
 from .models import CSRNet, SFANet, Bay, DMCount
 from .util.functions import load_image
-
 import torch
 
 
@@ -29,12 +28,15 @@ def load_model(model_name="CSRNet", model_weights="SHA"):
         model = available_models.get(model_name)
         if model:
             model = model.make_model(model_weights)
+            device = torch.device(
+                'cuda' if torch.cuda.is_available() else 'cpu')
+            model.to(device)  # Mover el modelo a la GPU si está disponible
             loaded_models[model_full_name] = model
-            print("Built model {} with weights {}".format(
-                model_name, model_weights))
+            print(
+                f"Built model {model_name} with weights {model_weights} on {device}")
         else:
             raise ValueError(
-                "Invalid model_name. Model {} is not available.".format(model_name))
+                f"Invalid model_name. Model {model_name} is not available.")
 
     return loaded_models[model_full_name]
 
@@ -44,6 +46,8 @@ def get_count(img_paths, model_name="CSRNet", model_weights="SHA", model=None, i
     """
     Return the count on image/s. You can use already loaded model or choose the name and pre-trained weights.
     """
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # if one path to array
     if type(img_paths) != list:
@@ -61,12 +65,12 @@ def get_count(img_paths, model_name="CSRNet", model_weights="SHA", model=None, i
         imgs.append(img)
         names.append(name)
 
-    # Concatenar las imágenes y moverlas a la GPU
-    # Mover las imágenes a la GPU
-    imgs = torch.cat(imgs).to(torch.device('cuda'))
+    # Concatenar las imágenes y moverlas a la GPU/CPU según disponibilidad
+    imgs = torch.cat(imgs).to(device)
 
     with torch.set_grad_enabled(False):
-        outputs = model(imgs)  # Ejecutar el modelo en la GPU
+        # Ejecutar el modelo en el dispositivo disponible (GPU o CPU)
+        outputs = model(imgs)
 
     # Mover los resultados de vuelta a la CPU para su manejo
     counts = torch.sum(outputs, (1, 2, 3)).cpu().numpy()

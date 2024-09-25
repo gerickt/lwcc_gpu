@@ -1,6 +1,7 @@
 from pathlib import Path
 import gdown
 import os
+import torch
 
 from torchvision import transforms
 from PIL import Image
@@ -38,6 +39,12 @@ def weights_check(model_name, model_weights):
     return output
 
 
+def load_weights_to_device(weights_path):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # Cargar los pesos al dispositivo adecuado
+    return torch.load(weights_path, map_location=device)
+
+
 def load_image(img_path, model_name, is_gray=False, resize_img=True):
     if not os.path.isfile(img_path):
         raise ValueError("Confirm that {} exists".format(img_path))
@@ -71,9 +78,11 @@ def load_image(img_path, model_name, is_gray=False, resize_img=True):
         width = round(width / 16) * 16
         img = img.resize((width, height), Image.BILINEAR)
 
-    img = trans(img)
-    img = img.unsqueeze(0)
+    img = trans(img).unsqueeze(0)
+
+    # Aquí es donde mueves las imágenes al dispositivo
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    img = img.to(device)
 
     name = os.path.basename(img_path).split('.')[0]
-
     return img, name
